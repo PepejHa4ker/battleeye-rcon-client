@@ -1,10 +1,13 @@
 package com.pepej.battleeyercon.client
 
 import com.pepej.battleeyercon.enum.BattleEyeCommand
+import com.pepej.battleeyercon.mapper.BattleEyeCommandResponseMapper
 import com.pepej.battleeyercon.response.BattleEyeResponseHandler
 import java.net.InetSocketAddress
 
 interface BattleEyeClient {
+
+    val mappers: Map<Class<*>, BattleEyeCommandResponseMapper<*>>
 
     suspend fun connect(host: InetSocketAddress, password: String)
 

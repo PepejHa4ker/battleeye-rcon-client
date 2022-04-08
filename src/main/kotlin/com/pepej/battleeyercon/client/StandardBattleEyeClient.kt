@@ -3,6 +3,9 @@ package com.pepej.battleeyercon.client
 import com.pepej.battleeyercon.enum.BattleEyeCommand
 import com.pepej.battleeyercon.enum.BattleEyePacketType
 import com.pepej.battleeyercon.enum.DisconnectType
+import com.pepej.battleeyercon.mapper.BattleEyeCommandResponseMapper
+import com.pepej.battleeyercon.mapper.BattleEyePlayersCommandResponseMapper
+import com.pepej.battleeyercon.response.BattleEyeCommandResponse
 import com.pepej.battleeyercon.response.BattleEyeResponseHandler
 import kotlinx.coroutines.*
 import java.io.IOException
@@ -56,6 +59,8 @@ class StandardBattleEyeClient : BattleEyeClient {
     private val emptyCommandQueueOnConnect: AtomicBoolean = AtomicBoolean(true)
 
     private val battleEyeClientResponseHandlerList: MutableList<BattleEyeResponseHandler> = ArrayList()
+    override val mappers: Map<Class<*>, BattleEyeCommandResponseMapper<*>> = mapOf(BattleEyePlayersCommandResponseMapper::class.java to BattleEyePlayersCommandResponseMapper)
+
 
 
     override suspend fun connect(host: InetSocketAddress, password: String) {
@@ -250,7 +255,7 @@ class StandardBattleEyeClient : BattleEyeClient {
 
     private fun fireCommandResponseHandler(commandResponse: String, id: Int) {
         for (commandResponseHandler in battleEyeClientResponseHandlerList) {
-            commandResponseHandler.onCommandResponseReceived(commandResponse, id)
+            commandResponseHandler.onCommandResponseReceived(BattleEyeCommandResponse(commandResponse, id))
         }
     }
 

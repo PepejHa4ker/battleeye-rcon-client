@@ -5,6 +5,10 @@
 import com.pepej.battleeyercon.client.BattleEyeClient
 import com.pepej.battleeyercon.enum.BattleEyeCommand
 import com.pepej.battleeyercon.enum.DisconnectType
+import com.pepej.battleeyercon.mapper.BattleEyePlayersCommandResponseMapper
+import com.pepej.battleeyercon.mapper.mapTo
+import com.pepej.battleeyercon.models.Player
+import com.pepej.battleeyercon.response.BattleEyeCommandResponse
 import com.pepej.battleeyercon.response.BattleEyeResponseHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,14 +20,16 @@ fun main() {
     val client = BattleEyeClient.standard()
     scope.launch { //launch an client coroutine
         client.connect("localhost", 2305, "12345") //connect to the server
-        client.addBattleEyeClientResponseHandler(DemoResponseHandler)
-        client.sendCommand(BattleEyeCommand.Add)
+        client.addBattleEyeClientResponseHandler(DemoResponseHandler(client))
+        client.sendCommand(BattleEyeCommand.Players)
     }
 
     while (true) {}
+
 }
 
-object DemoResponseHandler : BattleEyeResponseHandler {
+class DemoResponseHandler(override val client: BattleEyeClient) : BattleEyeResponseHandler {
+
     override val onConnected: () -> Unit = {
         println("Connected")
     }
@@ -31,9 +37,11 @@ object DemoResponseHandler : BattleEyeResponseHandler {
         println("Disconnected with $it reason")
     }
 
-    override val onCommandResponseReceived: (commandResponse: String, id: Int) -> Unit = { command, id ->
-        println("Response received: $command with id: $id")
+    override val onCommandResponseReceived: (BattleEyeCommandResponse) -> Unit = { r ->
+        r.mapTo<BattleEyePlayersCommandResponseMapper, List<Player>>(client)
+            .forEach(::println)
     }
+    
     override val onMessageReceived: (message: String) -> Unit = {
         println("Message received $it")
     }
