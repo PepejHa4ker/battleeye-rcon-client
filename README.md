@@ -1,6 +1,6 @@
-#BattleEyeRConClient is a simple asynchronous kotlin library which allows you to manage your BE servers
+# BattleEyeRConClient is a simple asynchronous kotlin library which allows you to manage your BE servers
 
-###Code usage example:
+### Code usage example:
 ```kotlin
 import com.pepej.battleeyercon.client.BattleEyeClient
 import com.pepej.battleeyercon.enum.BattleEyeCommand
@@ -17,7 +17,7 @@ fun main() {
     scope.launch { //launch an client coroutine
         client.connect("localhost", 2305, "12345") //connect to the server
         client.addBattleEyeClientResponseHandler(DemoResponseHandler)
-        client.sendCommand(BattleEyeCommand.Players)
+        client.sendCommand(BattleEyeCommand.Add)
     }
 
     while (true) {}
