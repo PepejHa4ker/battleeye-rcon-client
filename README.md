@@ -12,14 +12,15 @@ import kotlinx.coroutines.launch
 
 val scope = CoroutineScope(Dispatchers.IO)
 
-suspend fun main() {
+fun main() {
     val client = BattleEyeClient.standard()
     scope.launch { //launch an client coroutine
         client.connect("localhost", 2305, "12345") //connect to the server
         client.addBattleEyeClientResponseHandler(DemoResponseHandler)
         client.sendCommand(BattleEyeCommand.Players)
-    }.join()
+    }
 
+    while (true) {}
 }
 
 object DemoResponseHandler : BattleEyeResponseHandler {
