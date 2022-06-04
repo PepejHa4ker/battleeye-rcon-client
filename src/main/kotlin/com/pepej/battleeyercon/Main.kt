@@ -1,7 +1,5 @@
-# BattleEyeRConClient is a simple asynchronous kotlin library which allows you to manage your BE servers
+package com.pepej.battleeyercon
 
-### Code usage example:
-```kotlin
 import com.pepej.battleeyercon.client.BattleEyeClient
 import com.pepej.battleeyercon.enum.BattleEyeCommand
 import com.pepej.battleeyercon.enum.DisconnectType
@@ -50,4 +48,3 @@ class DemoResponseHandler(override val client: BattleEyeClient) : BattleEyeRespo
         println(it)
     }
 }
-```

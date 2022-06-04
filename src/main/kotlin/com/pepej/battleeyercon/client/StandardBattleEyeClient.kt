@@ -59,7 +59,7 @@ class StandardBattleEyeClient : BattleEyeClient {
     private val emptyCommandQueueOnConnect: AtomicBoolean = AtomicBoolean(true)
 
     private val battleEyeClientResponseHandlerList: MutableList<BattleEyeResponseHandler> = ArrayList()
-    override val mappers: Map<Class<*>, BattleEyeCommandResponseMapper<*>> = mapOf(BattleEyePlayersCommandResponseMapper::class.java to BattleEyePlayersCommandResponseMapper)
+    private val mappers: MutableList<BattleEyeCommandResponseMapper<*>> = mutableListOf()
 
 
 
@@ -116,7 +116,7 @@ class StandardBattleEyeClient : BattleEyeClient {
         fireConnectionDisconnectedHandler(type)
 
         if (type === DisconnectType.ConnectionLost && autoReconnect.get()) {
-            coroutineScope.launch {
+            scope().launch {
                 try {
                     withContext(Dispatchers.IO) {
                         sleep(RECONNECT_DELAY)
@@ -135,6 +135,10 @@ class StandardBattleEyeClient : BattleEyeClient {
 
     override fun setAutoReconnect(autoReconnect: Boolean) {
         this.autoReconnect.set(autoReconnect)
+    }
+
+    override fun scope(): CoroutineScope {
+        return coroutineScope
     }
 
     override suspend fun sendCommand(command: String): Int {
@@ -172,7 +176,6 @@ class StandardBattleEyeClient : BattleEyeClient {
             commandBuilder.append(" ")
             commandBuilder.append(it)
         }
-        println("Sending ${commandBuilder.toString()}")
         return sendCommand(commandBuilder.toString())
 
     }
@@ -216,6 +219,22 @@ class StandardBattleEyeClient : BattleEyeClient {
 
     override fun removeAllBattleEyeClientResponseHandlers() {
         battleEyeClientResponseHandlerList.clear()
+    }
+
+    override fun addCommandMapper(mapper: BattleEyeCommandResponseMapper<*>): Boolean {
+        return mappers.add(mapper)
+    }
+
+    override fun removeCommandMapper(mapper: BattleEyeCommandResponseMapper<*>): Boolean {
+        return mappers.remove(mapper)
+    }
+
+    override fun getAllCommandMappers(): List<BattleEyeCommandResponseMapper<*>> {
+        return mappers
+    }
+
+    override fun removeAllCommandMappers() {
+        return mappers.clear()
     }
 
     private suspend fun connectInternal(password: String) {
@@ -528,6 +547,13 @@ class StandardBattleEyeClient : BattleEyeClient {
             return false
         }
         return datagramChannel!!.isConnected && connected.get()
+    }
+
+    override fun close() {
+        scope().launch {
+            disconnectInternal(DisconnectType.Manual)
+        }
+        scope().cancel()
     }
 
 }
